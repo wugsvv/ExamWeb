@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8" />
+<title>答题系统</title>
+<link rel="stylesheet" href="Stylesheet.css" />
+<script type="text/javascript" src="mathjs.js"></script>
+<style type="text/css">
+* {
+	padding: 0;
+	margin: 0;
+}
+
+ul li {
+	list-style: none;
+}
+
+button {
+	background-color: transparent;
+}
+
+button:focus {
+	outline: 0;
+	border: 1px #ddd solid;
+}
+
+body {
+	background-color: #57C085;
+	position: relative;
+}
+
+#blackCover {
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	position: fixed;
+	top: 0;
+	left: 0;
+	display: none;
+}
+
+.black {
+	background-color: rgba(0, 0, 0, 0.5) !important;
+	display: block !important;
+}
+
+#blackCover>div {
+	background-color: #ddd;
+	width: 280px;
+	height: 160px;
+	margin-left: -140px;
+	position: absolute;
+	left: 50%;
+	top: 150px;
+	border-radius: 10px;
+}
+
+/* "提示" */
+#blackCover span {
+	display: block;
+	text-align: center;
+	color: #000;
+	margin-top: 10px;
+	font-size: 16px;
+	font-weight: 700;
+	padding: 5.4% 0;
+	margin: 0 auto;
+}
+
+#information {
+	text-align: justify;
+	color: #3f3f3f;
+	margin-bottom: 20px;
+	padding: 0 10px;
+	font-size: 15px;
+}
+
+#goOn {
+	display: block;
+	background-color: #ED171F;
+	width: 30.4%;
+	margin: 0 auto;
+	font-size: 14px;
+	color: #fff;
+	font-weight: 700;
+	height: 36px;
+	border-radius: 8px;
+	line-height: 36px;
+	border: 1px solid red;
+}
+
+#main {
+	width: 960px;
+	height: 660px;
+	margin: 30px auto;
+}
+
+#examTitle {
+	width: 100%;
+	height: 100px;
+	background-color: #27AE61;
+}
+
+#examTitle h1 {
+	color: #FFFFFF;
+	padding: 20px 0 30px 40px;
+	float: left;
+	width: 400px;
+	font-size: 36px;
+}
+
+#timing {
+	float: right;
+	width: 220px;
+	height: 50px;
+	margin: 22px 30px 0 0;
+	background:
+		url("data:image/svg+xml,%3Csvg class='icon' viewBox='0 0 1024 1024' xmlns='http://www.w3.org/2000/svg' width='32' height='32' %3E%3Cpath d='M913.892 470.344C866.856 339.898 752 239.779 609.227 207.91c36.588-52.48 97.191-86.976 165.988-86.976 111.86 0 202.508 90.683 202.508 202.49.036 58.032-24.706 109.998-63.83 146.923zM524.486 128.505v127.324c194.311 7.93 349.502 167.497 349.502 363.725 0 81.957-27.365 157.264-72.981 218.166l84.458 146.284-70.18 40.49-72.239-125.196c-63.247 52.852-144.637 84.723-233.508 84.723-88.377 0-169.375-31.443-232.481-83.802l-74.153 128.407-70.127-40.49 86.142-149.263c-46.167-61.065-73.886-136.903-73.886-219.34 0-194.933 153.149-353.615 345.545-363.527V128.467c-19.65-7.024-33.892-25.361-33.892-47.426 0-28.111 22.79-50.866 50.866-50.866 28.111 0 50.866 22.772 50.866 50.866 0 22.099-14.275 40.417-33.929 47.46zm-298.473 491.05c0 156.571 126.918 283.488 283.488 283.488s283.488-126.881 283.488-283.488c0-156.553-126.918-283.472-283.488-283.472S226.013 463.001 226.013 619.555zm368.477 61.278H492.704c-18.711 0-33.892-15.2-33.892-33.91V511.262c0-18.747 15.182-33.929 33.892-33.929 18.783 0 33.929 15.182 33.929 33.929V613.01h67.855c18.73 0 33.892 15.163 33.892 33.946 0 18.676-15.163 33.874-33.892 33.874zM110.179 470.344c-39.124-36.926-63.884-88.908-63.884-146.941 0-111.824 90.665-202.49 202.508-202.49 68.815 0 129.399 34.513 165.988 86.994-142.755 31.871-257.575 131.988-304.611 262.434z' fill='%23189837'/%3E%3C/svg%3E")
+		15px center no-repeat #fff;
+	border-radius: 100px;
+}
+
+#timer {
+	width: 60px;
+	height: 40px;
+	color: #3C926E;
+	font-size: 24px;
+	padding: 10px 0 0 60px;
+	display: inline-block;
+}
+
+#suspend {
+	width: 40px;
+	height: 40px;
+	border: none;
+	border-radius: 100px;
+	background-color: #6AC895;
+	color: #fff;
+	float: right;
+	margin: 5px 8px;
+	display: inline-block;
+	font-size: 18px;
+	font-weight: 800;
+	line-height: 40px;
+	text-align: center;
+}
+
+/*左侧选题区域*/
+#itemSelection {
+	width: 25%;
+	height: 100%;
+	box-shadow: 4px 0 2px #EFF1F0;
+	float: left;
+	background: linear-gradient(to right, #EDF8F2 0%, #EDF8F2 97.9%, #C8CBCA 98%,
+		#FAFAFA 100%);
+	box-sizing: border-box;
+}
+
+#itemChoose {
+	width: 100%;
+	height: 600px;
+	padding: 10px 12px 0 3px;
+	box-sizing: border-box;
+}
+
+#itemChoose>div {
+	width: 100%;
+	margin: 6px;
+	float: left;
+}
+
+#itemChoose button {
+	width: 18px;
+	height: 18px;
+	text-align: center;
+	font-size: 14px;
+	border: 1px solid #39CB76;
+	border-radius: 3px;
+	color: #39CB76;
+	font-family: "黑体";
+	float: left;
+	margin: 6px 3px 6px 6px;
+}
+
+#itemChoose>div p {
+	height: 16px;
+	line-height: 16px;
+	text-align: left;
+	float: left;
+	margin: 6px 3px 6px 3px;
+	font-size: 15px;
+	color: #6EAD8B;
+}
+
+#itemChoose>div ul {
+	display: block;
+	margin: 0 3px;
+	float: left;
+	width: 100%;
+}
+
+#itemChoose>div li {
+	text-align: center;
+	font-size: 15px;
+	border-radius: 3px;
+	float: left;
+	margin: 3px 5px;
+	cursor: pointer;
+}
+
+.nowAnswer {
+	background-color: #F0FAF5;
+	border: 1px solid #609080;
+	color: #90B5A2;
+	width: 22px;
+	height: 22px;
+	line-height: 22px;
+	box-shadow: 0px 0px 4px #888888;
+}
+
+.markAnswer {
+	background-color: #FFAD00 !important;
+	border: 1px solid #FFAD00 !important;
+	color: #fff !important;
+	width: 22px;
+	height: 22px;
+	line-height: 22px;
+}
+
+.yesAnswer {
+	background-color: #2AB064;
+	border: 1px solid #2AB064;
+	color: #fff;
+	width: 22px;
+	height: 22px;
+	line-height: 22px;
+}
+
+.noAnswer {
+	background-color: #F0FAF5;
+	border: 1px solid #ddd;
+	color: #90B5A2;
+	width: 22px;
+	height: 22px;
+	line-height: 22px;
+}
+
+/*标记指示信息*/
+#markInfo {
+	width: 100%;
+	height: 80px;
+	background-color: #D5EDDF;
+	box-sizing: border-box;
+	padding: 8px 10px;
+	background: linear-gradient(to right, #D5EDDF, #D6EEE0 97.9%, #A4BAAD 98%, #D2E8DB
+		100%);
+}
+
+#markInfo li {
+	height: 20px;
+	line-height: 20px;
+	font-size: 18px;
+	display: block;
+	width: 60px;
+	float: left;
+	font-size: 12px;
+	margin: 5px 10px;
+}
+
+#markInfo span {
+	display: inline-block;
+	width: 20px;
+	height: 20px;
+	border-radius: 3px;
+	vertical-align: middle;
+	margin-left: 5px;
+}
+
+#answer {
+	width: 75%;
+	height: 100%;
+	float: left;
+}
+
+#info {
+	width: 100%;
+	height: 50px;
+	background-color: #F2F2F2;
+	float: left;
+	font-family: "宋体";
+	line-height: 50px;
+	text-indent: 15px;
+	font-size: 15px;
+	color: #333;
+}
+
+#item {
+	width: 100%;
+	height: 550px;
+	background-color: #FFFFFF;
+	float: left;
+	padding: 20px 30px;
+	box-sizing: border-box;
+	position: relative;
+}
+
+#index {
+	font-style: normal;
+	margin-bottom: 20px;
+	display: block;
+	font-size: 20px;
+	color: #1F834B;
+	font-weight: 800;
+}
+
+#describe {
+	line-height: 23px;
+	word-spacing: 20px;
+	/*字符宽度，专有空格*/
+	letter-spacing: 1px;
+	text-align: justify;
+	margin-bottom: 15px;
+}
+
+/* 题目中的图片 */
+#describe img {
+	max-width: 80%;
+	margin: 10px auto;
+}
+
+#option {
+	background-color: #EEF9F3;
+	padding: 10px 15px;
+	border-radius: 5px;
+}
+
+#option p {
+	display: inline-block;
+	line-height: 17px;
+	text-align: justify;
+	margin: 5px 20px 0 10px;
+}
+
+#option i {
+	font-style: normal;
+}
+
+#option li {
+	margin: 5px 0;
+}
+
+/* 题目解析 */
+#explain {
+	margin: 0 30px;
+	width: 626px;
+	background: rgba(87, 192, 133, 0.05);
+	position: absolute;
+	bottom: 20px;
+	right: 0;
+	border: 1px dashed #ffd;
+	border-radius: 5px;
+	padding: 10px 15px;
+	text-align: justify;
+	font-size: 16px;
+	color: #3f3f3f;
+	line-height: 22px;
+}
+
+#explain p:first-child {
+	color: #4B7C5F;
+	font-weight: 800;
+	margin: 0 0 6px -8px;
+}
+
+#ctrlBtn {
+	width: 100%;
+	height: 80px;
+	background-color: #D5EDDF;
+	float: left;
+}
+
+#ctrlBtn button {
+	width: 80px;
+	height: 36px;
+	border: none;
+	border-radius: 3px;
+	text-align: center;
+	color: #fff;
+	font-size: 16px;
+	float: left;
+	margin: 20px -24px 12px 30px;
+}
+
+.enable {
+	color: #EEE !important;
+}
+
+#prevItem, #nextItem, #calculator {
+	background-color: #2BC76D;
+}
+
+#markItem {
+	background-color: #FBAD04;
+	margin-left: 40px !important;
+}
+
+#submit {
+	background-color: #FF635C;
+	margin-left: 240px !important;
+}
+</style>
+</head>
+<link rel="stylesheet" href="" />
+
+<body>
+
+	<div id="main">
+
+		<div id="examTitle">
+			<h1>强强科技自主考试系统</h1>
+			<div id="timing">
+				<time id="timer"></time>
+				<button id="suspend">||</button>
+			</div>
+		</div>
+		<div id="itemSelection">
+			<div id="itemChoose"></div>
+			<ul id="markInfo">
+				<li>当前<span class="nowAnswer"></span></li>
+				<li>未做<span class="noAnswer"></span></li>
+				<li>待查<span class="markAnswer"></span></li>
+				<li>已做<span class="yesAnswer"></span></li>
+			</ul>
+		</div>
+		<div id="answer">
+			<div id="info">
+				<h2>低等数学考试</h2>
+			</div>
+			<div id="item">
+				<i id="index"> 1丨单选题</i>
+				<p id="describe"></p>
+				<ul id="option"></ul>
+				<div id="explain">
+					<p>【答案解析】</p>
+					<p id="knowledge"></p>
+
+				</div>
+			</div>
+
+
+			<div id="ctrlBtn">
+				<button id="prevItem">上一题</button>
+				<button id="nextItem">下一题</button>
+				<button id="calculator">计算器</button>
+				<button id="markItem">设置待查</button>
+				<button id="submit">交卷</button>
+			</div>
+		</div>
+	</div>
+
+	<div id="blackCover">
+		<div>
+			<span>提示</span>
+			<p id="information">当前考试已暂停，点击下方按钮继续答题</p>
+			<button id="goOn">继续</button>
+		</div>
+	</div>
+
+	<script src="mathjs.js"></script>
+	<script>
+  //配置信息设置
+    var indexItem = 0; //全局变量，当前的题目编号
+    var maxtime = 60 * 60; //一个小时，按秒计算，自己调整!
+    var itemCouAll = subject[subject.length - 1].order; //大题总数
+    var t; //定时器
+
+    window.onload = function() {
+
+        // ----- 填充HTML ------
+
+        var orderNo = [];
+
+        //写入各个大题的div
+        var itemChooseHTML = '';
+        for (var i = 0; i < itemCouAll; i++) {
+            itemChooseHTML +=
+                `
+                    <div id = ${'order'+i} >
+                        <button> - </button>
+                        <p>第${i+1}道大题</p>
+                        <ul></ul>
+                    </div>
+                `
+        }
+        document.getElementById('itemChoose').innerHTML = itemChooseHTML;
+
+
+        //写入div下的ul li
+
+        //获取每个div下应有多少li
+        var orderCou = [];
+        for (var i = 0; i < itemCouAll; i++) {
+            var m = 0;
+            for (var j = 0; j < subject.length; j++) {
+                if (subject[j].order === i + 1) {
+                    m++;
+                }
+            }
+            orderCou[i] = m;
+        }
+
+        for (var i = 0; i < itemCouAll; i++) {
+            var optionHTML = '';
+            for (var j = 0; j < orderCou[i]; j++) {
+                optionHTML += `<li class="noAnswer">${j+1}</li>`
+            }
+            document.getElementById('order' + i).getElementsByTagName("ul")[0].innerHTML = optionHTML;
+        }
+
+
+        //绑定各个li，注意这里的i的作用域，可使用虚拟属性，参考https://www.cnblogs.com/wangyongshf/p/7466799.html
+        var liList = document.getElementById('itemChoose').getElementsByTagName('li');
+        for (var i = 0; i < liList.length; i++) {
+            liList[i].index = i;
+            liList[i].onclick = function() {
+                indexItem = this.index;
+                refresh();
+            }
+        }
+
+        //设置各个li的class，是否符合回答规范、设置了待查标记
+        for (var i = 0; i < liList.length; i++) {
+
+            liList[i].className = YesOrNo(i);
+
+            if (subject[i].mark) { //设置待查标记
+                liList[i].classList.add('markAnswer');
+            } else {
+                liList[i].classList.remove('markAnswer');
+            }
+
+        }
+
+        // 开始倒计时
+        document.getElementById('suspend').innerHTML = '||';
+        t = setInterval("CountDown()", 1000);
+
+        refresh(); //加载题目
+
+    }
+
+    // ------ 计时程序 -----
+    function CountDown() {
+        if (maxtime >= 0) {
+            //写入HTML
+            hours = checkTime(parseInt(maxtime / 60 / 60) % 60);
+            minutes = checkTime(parseInt(maxtime / 60) % 60);
+            seconds = checkTime(parseInt(maxtime % 60));
+            msg = hours + ":" + minutes + ":" + seconds;
+            document.getElementById("timer").innerHTML = msg;
+
+            maxtime--;
+
+            if (maxtime === 5 * 60) {
+                document.getElementById('information').innerHTML = "还剩5分钟，点击下方按钮继续答题";
+                document.getElementById('suspend').click();
+            }
+
+        } else {
+            clearInterval(t);
+            alert("时间到，结束!");
+            //开始结算
+        }
+    }
+
+    function checkTime(i) { //将0-9的数字前面加上0，例1变为01
+        if (i < 10) {
+            i = "0" + i;
+        }
+        return i;
+    }
+
+
+
+    //
+    //题目刷新
+    //
+    function refresh() {
+        //题目序号与题目类型描述文本
+        var itemType = ''; //单选题、多选题
+        switch (subject[indexItem].type) {
+            case "single":
+                itemType = '单选题';
+                break;
+            case "judge":
+                itemType = '判断题';
+                break;
+            case "multiple":
+                itemType = '多选题';
+                break;
+            case "indeterminate":
+                itemType = '不定项';
+                break;
+        }
+        document.getElementById("index").innerHTML = indexItem + 1 + '丨' + itemType;
+
+        //题目描述
+        var describeText = "";
+        describeText += subject[indexItem].describe;
+        document.getElementById("describe").innerHTML = describeText;
+
+        //答案选项
+        var optNum = subject[indexItem].option.length;
+        var optionText = "";
+        var inputType = "";
+        var inputName = subject[indexItem].type;
+        switch (subject[indexItem].type) {
+            case "single":
+            case "judge":
+                inputType = "radio";
+                break;
+            case "multiple":
+            case "indeterminate":
+                inputType = "checkbox";
+                break;
+        }
+
+        for (var i = 0; i < optNum; i++) {
+            var itemChecked = '';
+            if (subject[indexItem].type === 'indeterminate' || subject[indexItem].type === 'multiple') {
+                if (subject[indexItem].answer.charAt(i) !== '_' && subject[indexItem].answer.charAt(i) !== '') {
+                    itemChecked = 'checked="checked"';
+                }
+            } else {
+                if (subject[indexItem].answer === String.fromCharCode(65 + i)) {
+                    itemChecked = 'checked="checked"';
+                }
+            }
+
+            optionText +=
+                `
+                <li>
+                    <input type=${inputType} name="opt" value= ${String.fromCharCode(65 + i)} ${itemChecked}/>
+                    <i>${String.fromCharCode(65 + i)}</i>
+                    <p>${subject[indexItem].option[i]}</p>
+                </li>
+                `
+        }
+        document.getElementById("option").innerHTML = optionText;
+
+        //答案解析
+        document.getElementById("knowledge").innerHTML = subject[indexItem].explain;
+
+        //按钮禁用状态
+        if (indexItem === 0) {
+            document.getElementById("prevItem").className += "enable";
+        } else if (indexItem === subject.length - 1) {
+            document.getElementById("nextItem").className += "enable";
+        } else {
+            document.getElementById("prevItem").className = "";
+            document.getElementById("nextItem").className = "";
+        }
+
+        //待查状态设置
+        if (subject[indexItem].mark == 1) { //这里==表示约等于，true也可以视为1
+            document.getElementById('markItem').innerHTML = '取消待查';
+        } else {
+            document.getElementById('markItem').innerHTML = '设置待查';
+        }
+
+
+        //设置左侧答题卡对应题目为当前
+        var liList = document.getElementById('itemChoose').getElementsByTagName('li');
+        for (var i = 0; i < liList.length; i++) {
+            if (i === indexItem) {
+                liList[i].classList.add('nowAnswer');
+            } else {
+                liList[i].classList.remove('nowAnswer');
+            }
+        }
+
+        BindOpt(); //重新绑定点击选项的事件
+
+    }
+
+
+    //上/下一题按钮绑定
+    document.getElementById("prevItem").onclick = function() {
+        if (indexItem) {
+            indexItem--;
+            refresh();
+        }
+    }
+
+    document.getElementById("nextItem").onclick = function() {
+        if (indexItem < subject.length - 1) {
+            indexItem++;
+            refresh();
+        }
+    }
+
+
+    //设置标记按钮绑定
+    document.getElementById('markItem').onclick = function() {
+        if (this.innerHTML === '设置待查') {
+            //左侧的class增加markAnswer
+            subject[indexItem].mark = 1;
+            this.innerHTML = '取消待查';
+            document.getElementById('itemChoose').getElementsByTagName('li')[indexItem].classList.add('markAnswer');
+        } else { //恢复原始的答题状态
+            subject[indexItem].mark = 0;
+            this.innerHTML = '设置待查';
+            document.getElementById('itemChoose').getElementsByTagName('li')[indexItem].classList.remove('markAnswer');
+        }
+    }
+
+    //绑定选项按钮单击事件
+    function BindOpt() {
+        for (var i = 0; i < document.getElementById("option").getElementsByTagName('input').length; i++) {
+
+            document.getElementById("option").getElementsByTagName('input')[i].onchange = function() {
+                //将当前答案写到JSon中
+
+                subject[indexItem].answer = ''; //清除原有答案
+                for (var j = 0; j < document.getElementById("option").getElementsByTagName('input').length; j++) {
+                    if (document.getElementById("option").getElementsByTagName('input')[j].checked) {
+                        subject[indexItem].answer += document.getElementById("option").getElementsByTagName('input')[j].value;
+                    } else {
+                        if (subject[indexItem].type === 'multiple' || subject[indexItem].type === 'indeterminate') {
+                            subject[indexItem].answer += '_';
+                        }
+                    }
+                }
+
+                //改变左侧答题卡显示状态
+                //
+                if (YesOrNo(indexItem) === 'noAnswer') {
+                    document.getElementById('itemChoose').getElementsByTagName('li')[indexItem].classList.add('noAnswer');
+                    document.getElementById('itemChoose').getElementsByTagName('li')[indexItem].classList.remove('yesAnswer');
+                } else {
+                    document.getElementById('itemChoose').getElementsByTagName('li')[indexItem].classList.add('yesAnswer');
+                    document.getElementById('itemChoose').getElementsByTagName('li')[indexItem].classList.remove('noAnswer');
+                }
+
+            }
+        }
+    }
+
+    //绑定计时按钮
+    document.getElementById('suspend').onclick = function() {
+
+        if (this.innerHTML === '||') {
+            this.innerHTML = '►';
+            clearInterval(t);
+        } else {
+            this.innerHTML = '||';
+            t = setInterval("CountDown()", 1000);
+        }
+        BlackCover();
+    }
+
+    function BlackCover() {
+        var bCover = document.getElementById('blackCover');
+        if (bCover.classList.contains('black')) {
+            bCover.classList.remove('black');
+        } else {
+            bCover.classList.add('black');
+        }
+    }
+
+    document.getElementById('goOn').onclick = function() {
+
+        document.getElementById('suspend').click();
+    }
+
+
+    //判断当前题目是否已作答
+    function YesOrNo(index) {
+
+        if (subject[index].type === 'multiple') {
+
+            var ans = new Array();
+            ans[0] = RepeatNum('_', subject[index].option.length);
+
+            for (var i = 0; i < subject[index].option.length; i++) {
+                ans[i + 1] = RepeatNum('_', i) + String.fromCharCode(65 + i) + RepeatNum('_', subject[index].option.length - 1 - i);
+            }
+            var blockJudge = false; //是否为空
+            for (var j = 0; j < ans.length; j++) {
+                if (subject[index].answer === ans[j]) {
+                    blockJudge = true;
+                    break;
+                }
+            }
+
+            if (blockJudge || subject[index].answer === '') {
+                return 'noAnswer';
+            } else {
+                return 'yesAnswer';
+            }
+
+        } else {
+            if (subject[index].answer !== '' && subject[index].answer !== RepeatNum('_', subject[index].option.length)) {
+                return 'yesAnswer';
+            } else {
+                return 'noAnswer';
+            }
+        }
+    }
+
+
+    //打印num个str，如times(n,3) nnn
+    function RepeatNum(str, num) {
+        if (num > 1) {
+            return str += RepeatNum(str, --num);
+        }
+        if (num === 1) {
+            return str;
+        } else {
+            return '';
+        }
+    }
+
+    document.getElementById('submit').onclick = function() {
+        var htmlText = '';
+        var account = 0; //总得分
+        for (var i = 0; i < subject.length; i++) {
+
+            //计算当前题目得分
+            var nowAccount;
+            if (subject[i].type === 'single') {
+                if (subject[i].answer === '' || subject[i].answer !== subject[i].solution) {
+                    nowAccount = 0;
+                } else {
+                    nowAccount = 2;
+                }
+            } else if (subject[i].type === 'judge') {
+                if (subject[i].answer === '' || subject[i].answer !== subject[i].solution) {
+                    nowAccount = -0.5;
+                } else {
+                    nowAccount = 1;
+                }
+            } else if (subject[i].type === 'indeterminate') {
+                if (subject[i].answer === '') { //如果未填写答案
+                    nowAccount = 0;
+                } else {
+                    var hasError = false; //假设没有错误选项
+                    for (var j = 0; j < subject[i].option.length; j++) {
+                        if (subject[i].answer.charAt(j) !== '_' && subject[i].solution.charAt(j) === '_') { //有错误选项
+                            hasError = true;
+                            break;
+                        }
+                    }
+                    if (hasError) {
+                        nowAccount = 0;
+                    } else {
+                        nowAccount = subject[i].answer.replace(/_/g, "").length / subject[i].solution.replace(/_/g, "").length * 4;
+                    }
+
+                }
+            } else { //多选题
+                if (subject[i].answer === '') { //如果未填写答案
+                    nowAccount = 0;
+                } else {
+                    var hasError = false; //假设没有错误选项
+                    for (var j = 0; j < subject[i].option.length; j++) {
+                        if (subject[i].answer.charAt(j) !== '_' && subject[i].solution.charAt(j) === '_') { //有错误选项
+                            hasError = true;
+                            break;
+                        }
+                    }
+                    if (hasError) {
+                        nowAccount = 0;
+                    } else {
+                        if (subject[i].answer === subject[i].solution) { //全部正确
+                            nowAccount = 4;
+                        } else {
+                            if (subject[i].answer.replace(/_/g, "").length >= 4) {
+                                nowAccount = 3;
+                            } else {
+                                nowAccount = subject[i].answer.replace(/_/g, "").length;
+                            }
+                        }
+                    }
+                }
+            }
+            htmlText += '题目' + i + '  答案' + subject[i].solution + '            回答' + subject[i].answer + '          得分' + nowAccount.toFixed(2) + '\n';
+            account += nowAccount;
+        }
+
+        alert(htmlText + '\n总得分：' + account.toFixed(2));
+    }
+
+
+    document.getElementById('calculator').onclick = function() {
+        Run('calc');
+    }
+
+    </script>
+
+</body>
+
+</html>
